@@ -2,13 +2,15 @@
 find on IMDB.COM some titles like an input title
 
 INPUT :
-  1 - a title ($_GET['t']) 
-  2 - a country ($_GET['c']) : in order to filter all the titles of the 'movies' ('all' for no filter)
-  3 - a MoviesTypes ($_GET['g'] & see langages.php : $Types) : to filter only on some 'MoviesTypes'
+1 - a title ($_GET['t']) 
+2 - a country ($_GET['c']) : in order to filter all the titles of the 'movies' ('all' for no filter)
+3 - a MoviesTypes ($_GET['g'] & see langages.php : $Types) : to filter only on some 'MoviesTypes'
 
 OUTPUT :
   '0' if no title match the entry on IMDb.com, else an array:
+  
   array(
+  
 		imdb_id   : something like tt0456201 <- Id IMDB of the movie
 		title     : principal title (depend on country),
 		year      : IMDB year of the movie,
