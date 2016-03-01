@@ -2,8 +2,11 @@
 find on IMDB.COM some titles like an input title
 
 INPUT :
-1 - a title ($_GET['t']) 
-2 - a country ($_GET['c']) : in order to filter all the titles of the 'movies' ('all' for no filter)
+
+1 - a title ($_GET['t']),
+
+2 - a country ($_GET['c']) : in order to filter all the titles of the 'movies' ('all' for no filter),
+
 3 - a MoviesTypes ($_GET['g'] & see langages.php : $Types) : to filter only on some 'MoviesTypes'
 
 OUTPUT :
