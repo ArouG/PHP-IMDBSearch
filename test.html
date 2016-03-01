@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+    <meta charset="UTF-8">
+    <meta name="DC.Language" content="fr" >
+    <meta name="description" content="IMDBSEARCH_test" >
+    <meta name="author" content="ArouG" >
+    <meta name="date" content="2016-03-01">
+    <meta name="robots" content="nofollow" >
+    <title>Search IMDb Titles like</title>   
+    <style type="text/css">
+      h1,p {
+        text-align : center;
+      }
+      #myt {
+        display : none;
+        text-align : center;
+        border-collapse: separate;
+        border: 1px solid black
+      }
+      #myt td,#myt th{
+        border: 1px solid black;
+        text-align : left;
+      }
+    </style>        
+    <script type="text/javascript"> 
+        //<![CDATA[
+        var countries = Array("all", "Argentina", "Australia", "Austria", "Belgium", "Brazil", "Bulgaria", "Canada", "China", "Colombia", "Costa Rica", "Croatia", "Czech Republic", "Denmark", "Dominican Republic", "Estonia", "France", "Finland", "Germany", "Greece", "Hong Kong", "Hungary", "Iceland", "India", "Iran", "Ireland", "Italy", "Japan", "Malaysia", "Mexico", "Netherlands", "New Zealand", "Norway", "Peru", "Pakistan", "Poland", "Portugal", "Romania", "Russia", "Serbia", "Slovakia", "Slovenia", "Singapore", "South Africa", "South Korea", "Spain", "Sweden", "Switzerland", "Thailand", "Turkey", "Uruguay", "West Germany");
+        var categories = Array("Animation", "Animation Série", "Concert", "Documentaire", "Emission TV", "Film", "Série TV", "Spectacle", "Sport", "Vidéo-clips", "Vidéo-xXx");
+        var url;
+        var country;
+        var nbbut = 0;
+        var xhr_object = false;
+        var mygenres;
+        var blanc = "-";
+
+        function init_opt() {
+            myopts="France";    
+            mygenres=3;   
+            var index = 0;
+            for (var l = 1; l < countries.length; l++) {
+                new_element = new Option(countries[l], countries[l], false, true);
+                document.getElementById("countries").options[document.getElementById("countries").options.length] = new_element;
+                if (countries[l] == myopts) index = l;
+            }
+            document.querySelector("#countries").selectedIndex = index;   
+            for (var c=1; c<10; c++){
+                myid='#ci'+c;
+                val_ini=Math.pow(2,(c-1));  
+                val=(mygenres & val_ini) >> (c-1);
+                document.querySelector(myid).checked=false;
+                if (val==1){                   
+                    document.querySelector(myid).checked=true;
+                }
+            }
+        }
+
+		    function createXhrObject(){
+  		    if (window.XMLHttpRequest)
+  		        return new XMLHttpRequest();
+
+  		    if (window.ActiveXObject)
+  		    {
+  		        var names = [
+  		            "Msxml2.XMLHTTP.6.0",
+  		            "Msxml2.XMLHTTP.3.0",
+  		            "Msxml2.XMLHTTP",
+  		            "Microsoft.XMLHTTP"
+  		        ];
+  		        for(var i in names)
+  		        {
+  		            try{ return new ActiveXObject(names[i]); }
+  		            catch(e){}
+  		        }
+  		    }
+  		    window.alert("Your navigator can't deal XMLHTTPRequest. (too old ?)");
+  		    return null; // no supported
+		    }
+
+    		function lance(){
+          var time = new Date();         
+    			 var country=document.querySelector("#countries")[document.querySelector("#countries").selectedIndex].text;
+           request='imdbsearch.php?t=' + encodeURIComponent(url) + '&c=' + country + '&g=' + mygenres + '&date=' + time;
+    			 xhr_object.open('GET', request, false);
+           document.getElementById('request').textContent=request;             
+          try {
+              xhr_object.send(null);
+          } catch (e) {}
+    		}
+
+        function affiche() {
+            url = document.querySelector("#url").value;
+            xhr_object = createXhrObject();
+            if (!xhr_object) {
+                alert('error 7');
+                return false;
+            }
+            if (xhr_object.overrideMimeType) {
+                xhr_object.overrideMimeType('text/xml');
+            }
+
+            if (url.length == 0) {
+                alert('Please type a title !');
+            } else { 
+                xhr_object.onreadystatechange = traite_principal;
+                setTimeout(lance,0);
+            }
+        }
+
+        function traite_principal() { 
+          if (xhr_object.readyState == 4) {
+            document.querySelector("#myt").style.display = "none";
+            if ((xhr_object.responseText=="") || (xhr_object.responseText=="[aucune_valeur]")){
+              alert('No connection !');                   
+            } else {
+              if ((xhr_object.responseText=="0") || (xhr_object.responseText=="00")){
+                if (xhr_object.responseText=="0"){
+                  alert("Nothing found by IMDb !");
+                }
+              } else {
+                tab = JSON.parse(xhr_object.responseText);
+                if (typeof tab.code != 'undefined'){
+                  alert("No connection !");
+                } else {
+                  var mytr = document.querySelector("#bdd_entete").nextSibling;
+    
+                  while (mytr != null) {
+                      var mytbody = mytr.parentNode;
+                      mytbody.removeChild(mytr);
+                      mytr = document.querySelector("#bdd_entete").nextSibling;
+                  }
+    
+                  message = "IMDb has returned " + tab.length + " results";
+                  alert(message);
+    
+                  for (i = 0; i < tab.length; i++) {
+                // column IMDB Id & url
+                    tr = document.createElement("tr");
+                    td = document.createElement("td"); 
+                    nt = document.createTextNode(tab[i].imdb_id); 
+                    alien = document.createElement("a");
+                    alien.setAttribute("href", "http://imdb.com/title/" + tab[i].imdb_id + "/");
+                    alien.setAttribute("target", "_blank");
+                    alien.appendChild(nt);
+                    td.appendChild(alien);
+                    tr.appendChild(td);
+                // column title
+                    td = document.createElement("td"); 
+                    tab[i].title=tab[i].title.replace(/~~/g,"'");
+                    nt=document.createTextNode(tab[i].title); 
+                    td.appendChild(nt);
+                    tr.appendChild(td);
+                // column year
+                    td = document.createElement("td"); 
+                    nt = document.createTextNode(tab[i].year);
+                    td.appendChild(nt);
+                    tr.appendChild(td);
+                // column Director (s)
+                    td = document.createElement("td"); 
+                    if ((typeof tab[i].directors != 'undefined') && (tab[i].directors != '')) {
+                      tab[i].directors=tab[i].directors.replace(/~~/g,"'");
+                      nt = document.createTextNode(tab[i].directors); 
+                    } else
+                      nt = document.createTextNode(blanc);
+                    td.appendChild(nt);
+                    tr.appendChild(td);
+                // column country (ies)
+                    td = document.createElement("td");
+                    if ((typeof tab[i].country != 'undefined') && (tab[i].country != '')) {   
+                      var pays = tab[i].country.replace(/~~/g,"'");
+                      nt = document.createTextNode(pays); 
+                    } else
+                      nt = document.createTextNode(blanc); 
+                    td.appendChild(nt);
+                    tr.appendChild(td);
+                // column type (please attention : langage=French Change in imdbsearch.php for english spoken)
+                    td = document.createElement("td");
+                    nt = document.createTextNode(tab[i].type); 
+                    td.appendChild(nt);
+                    tr.appendChild(td);
+                    // column genres (please attention : langage=French Change in imdb.class.php for english spoken)
+                    td = document.createElement("td"); 
+                    nt = document.createTextNode(tab[i].genres); 
+                    td.appendChild(nt);
+                    tr.appendChild(td);
+                // column AKA
+                    laka = tab[i].also_known_as.replace(/~~/g,"'");
+                    nt = document.createTextNode(laka);
+                    td = document.createElement("td"); 
+                    td.appendChild(nt);
+                    tr.appendChild(td);
+
+                    document.querySelector("#mybody").appendChild(tr);
+                  } // boucle for    
+                  document.querySelector("#myt").style.display = "block";
+                }
+              }  
+            }  
+          } // if readystate
+        } // function        
+      //]]>
+    </script>
+</head>
+
+<body onload="init_opt();"> 
+        <h1> Searching IMDb titles ...</h1>
+        <p>Country(ies) :&nbsp;
+            <select size="1" id="countries">&nbsp;
+            <option>all</option></select>&nbsp; Movie Title :
+            <input id="url" size="60" type="text" maxlength="600" >&nbsp;
+            <input type="button" value="Go Search !" onclick="affiche()" >
+        </p>
+        <div id="cat_select">  
+            <table style="border : 1px; margin : 0 auto;">
+            <tr><td><b>Video Types :</b></td><td>
+                <INPUT type="checkbox" id="ci1" />Movie</td><td>
+                <INPUT type="checkbox" id="ci2" />TV Movie</td><td>
+                <INPUT type="checkbox" id="ci3" />TV Series</td><td>
+                <INPUT type="checkbox" id="ci4" />TV Episode</td><td>
+                <INPUT type="checkbox" id="ci5" />TV Special</td><td>
+                <INPUT type="checkbox" id="ci6" />Mini-Series</td><td>
+                <INPUT type="checkbox" id="ci7" />Documentary</td><td>
+                <INPUT type="checkbox" id="ci8" />Short</td><td>
+                <INPUT type="checkbox" id="ci9" />Video</td></tr>
+            </table>      
+        </div>
+        <p id="request"></p>
+        <hr>
+        <table id="myt" class="tableau">
+            <tbody id="mybody">
+                <tr id="bdd_entete">
+                    <th>IMDB</th>
+                    <th>title</th>
+                    <th>Year</th>
+                    <th>Director</th>
+                    <th>Country</th>
+                    <th>Type</th>
+                    <th>Genres</th>
+                    <th>Also Known As</th>
+                </tr>
+            </tbody>
+        </table>  
+</body>
+
+</html>
